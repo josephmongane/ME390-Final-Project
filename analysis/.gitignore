@@ -1,0 +1,14 @@
+# Ignore sensitive environment variables
+.env
+
+# Ignore dependency and build directories
+node_modules/
+dist/
+build/
+
+# Ignore all files with a specific extension
+*.log
+
+# Ignore OS-generated metadata files
+.DS_Store
+Thumbs.db
