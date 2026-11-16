@@ -31,4 +31,10 @@ function [TF] = genTransferFunction(x,u,p)
 %     state-space model.
 
 
+[A,B] = genLinearModel(p);
+
+C = [eye(3) zeros(3)];   % outputs: vx, vy, omega
+D = zeros(3,2);
+
+TF = minreal(tf(ss(A,B,C,D)), 1e-8);
 end

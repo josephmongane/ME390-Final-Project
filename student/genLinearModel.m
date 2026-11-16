@@ -30,4 +30,28 @@ function [A,B] = genLinearModel(p)
 %       u(1) = tau      Throttle [0-1]
 %       u(2) = delta    Gimbal angle [rad]
 
+m  = p.mass_kg;
+J  = p.inertia_kgm2;
+l  = p.length_m;
+T  = p.maxThrust_N;
+g  = p.gravity_mps2;
+bx = p.dragX_kgps;
+by = p.dragY_kgps;
+bw = p.rotDrag_kgm2ps;
+
+% vx, vy, omega, dx, dy, theta
+A = [ -bx/m   0      0      0   0   -g
+       0     -by/m   0      0   0    0
+       0      0     -bw/J   0   0    0
+       1      0      0      0   0    0
+       0      1      0      0   0    0
+       0      0      1      0   0    0 ];
+
+% tau, delta
+B = [  0      -g
+       T/m     0
+       0      -l*m*g/J
+       0       0
+       0       0
+       0       0 ];
 end

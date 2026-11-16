@@ -30,6 +30,12 @@ params = RocketParametersMedium();
 %
 % YOUR CODE HERE
 
+% Hover equilibrium when upright, not moving, thrust = weight
+x0 = [0;0;0;0;0;0];
+u0 = [params.mass_kg*params.gravity_mps2/params.maxThrust_N; 0];
+
+[A,B] = genLinearModel(params)
+TF = genTransferFunction(x0,u0,params)
 
 
 
@@ -40,7 +46,8 @@ params = RocketParametersMedium();
 % Determine the DC gain of each of the six transfer functions.
 %
 % YOUR CODE HERE
-
+K = dcgain(TF) % linear DC gains
+K_dB = 20*log10(abs(K)) % dB
 
 %% ========================================================================
 %  Q3: BANDWIDTH
@@ -50,6 +57,10 @@ params = RocketParametersMedium();
 %
 % YOUR CODE HERE
 
+% only Vy/tau and Omega/delta have a finite DC gain so only they have a bandwidth.
+% The other four are N/A since three are zero and Vx/delta has a pole at the origin.
+BW_Vy_tau = bandwidth(TF(2,1))
+BW_Omega_delta = bandwidth(TF(3,2))
 
 
 
@@ -60,7 +71,10 @@ params = RocketParametersMedium();
 % Create Bode plots for the six input-output pairs.
 %
 % YOUR CODE HERE
-
+figure
+bode(TF)
+grid on
+title('Bode plots of the six input-output pairs (Medium)')
 
 %% ========================================================================
 %  Q4: POLES
@@ -73,7 +87,10 @@ params = RocketParametersMedium();
 % values as needed.
 %
 % YOUR CODE HERE
-
+poles_A = eig(A) % all poles of the linear model
+poles_Vx_delta = pole(TF(1,2))
+poles_Vy_tau = pole(TF(2,1))
+poles_Omega_delta = pole(TF(3,2))
 
 
 %% ========================================================================
@@ -93,7 +110,25 @@ params = RocketParametersMedium();
 %
 % YOUR CODE HERE
 
+% Change one parameter at a time to 1.5 times its medium value and compare
+names = {'mass_kg','inertia_kgm2','maxThrust_N','length_m'};
 
+for k = 1:4
+    p = params; % start from medium
+    p.(names{k}) = 1.5*params.(names{k}); % change one parameter
+    u0_new = [p.mass_kg*p.gravity_mps2/p.maxThrust_N; 0];
+    TF_new = genTransferFunction(x0,u0_new,p);
+
+    figure
+    bode(TF, TF_new)
+    grid on
+    legend('Medium', ['1.5x ' names{k}], 'Interpreter','none')
+    title(['Effect of increasing ' names{k}], 'Interpreter','none')
+
+    disp(names{k})
+    dcgain_new = dcgain(TF_new)
+    poles_new  = eig(genLinearModel(p))
+end
 
 
 
